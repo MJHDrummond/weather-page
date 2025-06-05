@@ -11,7 +11,7 @@ app = FastAPI()
 origins = ["http://localhost:3000"]  # default for local
 
 if os.getenv("RENDER") == "true":  # Render sets this env var
-    origins = ["https://yourusername.github.io"]
+    origins = ["https://mjhdrummond.github.io"]
 
 app.add_middleware(
     CORSMiddleware,

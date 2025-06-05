@@ -16,7 +16,7 @@
   <script>
     function fetchImage() {
       const dt = document.getElementById("datetime").value;
-      const url = `http://localhost:8000/api/get_weather?datetime=${dt}`;
+      const url = `https://weatherpage-e7zw.onrender.com/api/get_weather?datetime=${dt}`;
 
       fetch(url)
         .then(res => {
