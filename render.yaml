@@ -6,4 +6,4 @@ services:
     region: frankfurt
     branch: master
     buildCommand: "pip install -r requirements.txt"
-    startCommand: "uvicorn app.main:app --host 0.0.0.0 --port 10000"
+    startCommand: "uvicorn app.routes.get_weather:app --host 0.0.0.0 --port 10000"
