@@ -1,0 +1,16 @@
+# Virtual environment
+.venv/
+Lib/
+Scripts/
+pyvenv.cfg
+
+# Python artifacts
+__pycache__/
+*.pyc
+
+# Environment files
+.env
+
+# OS
+.DS_Store
+Thumbs.db
