@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { getCurrentDatetime, getEarlierDatetime } from './helpers/datetime';
+import './App.css';
 
 function App() {
   const [datetime, setDatetime] = useState('');
@@ -6,60 +8,71 @@ function App() {
   const [error, setError] = useState(null);
   const baseUrl = process.env.REACT_APP_API_URL;
 
-  const getCurrentDatetime = () => {
-    const now = new Date();
-    const pad = (n) => String(n).padStart(2, '0');
-    return (
-      now.getFullYear().toString() +
-      pad(now.getMonth() + 1) +
-      pad(now.getDate()) +
-      pad(now.getHours()) +
-      '00'
-    );
-  };
+  const fetchImage = async (dt, retry = true) => {
+    try {
+      const res = await fetch(`${baseUrl}/api/get_weather?datetime=${dt}`)
+      const contentType = res.headers.get("content-type");
 
-  const fetchImage = (dt) => {
-    fetch(`${baseUrl}/api/get_weather?datetime=${dt}`)
-      .then(res => {
-        if (!res.ok) throw new Error("Failed to fetch");
-        return res.blob();
-      })
-      .then(blob => {
+      if (contentType && contentType.includes("application/json")){
+        if (retry) {
+          const retryDatetime = getEarlierDatetime(dt, 10);
+          setError("Could not load image, retrying with earlier time")
+          setImageUrl('');
+          return fetchImage(retryDatetime, true);
+        } else {
+          throw new Error("Stopping retry")
+        }
+      } else {
+        const blob = await res.blob();
         setImageUrl(URL.createObjectURL(blob));
         setError(null);
-      })
-      .catch(err => {
-        setImageUrl('');
-        setError("Could not load image");
-      });
+      }
+    } catch (err) {
+      setImageUrl('');
+      if (retry){
+        setError("Could not load image, retrying with earlier time")
+      } else {
+        setError("Could not load image, try choosing a new time");
+      }
+    }
   };
 
   useEffect(() => {
-    const current = getCurrentDatetime();
-    setDatetime(current);
-    fetchImage(current);
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const formatted = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    setDatetime(formatted);
   }, []);
+
+  useEffect(() => {
+    if (datetime) {
+      fetchImage(getCurrentDatetime());
+      }
+  }, [datetime]);
 
   const handleChange = (e) => setDatetime(e.target.value);
 
   const handleRefresh = () => fetchImage(datetime);
 
   return (
-    <div style={{ padding: 20 }}>
-      <h1>Weather Radar Viewer</h1>
-      <input
-        placeholder="YYYYMMDDHHMM"
-        value={datetime}
-        onChange={handleChange}
-        style={{ marginRight: 10 }}
-      />
-      <button onClick={handleRefresh}>Refresh Image</button>
+    <main className="weather-app">
+      <h1 className="weather-title">Live Weather Radar</h1>
 
-      <div style={{ marginTop: 20 }}>
-        {imageUrl && <img src={imageUrl} alt="Radar" />}
-        {error && <p style={{ color: 'red' }}>{error}</p>}
+      <div className="datetime-input">
+        <label htmlFor="datetime">Choose time: </label>
+        <input
+          type="datetime-local"
+          id="datetime"
+          name="datetime"
+          value={datetime}
+          onChange={handleChange}
+        />
       </div>
-    </div>
+
+      {imageUrl && <img src={imageUrl} alt="Weather Radar" className="radar-image" />}
+
+      {error && <div className="error-message">{error}</div>}
+    </main>
   );
 }
 

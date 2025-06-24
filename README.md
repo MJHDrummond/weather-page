@@ -12,7 +12,7 @@
 
 This project was used as an introduction to GitHub Pages and Render. 
 
-GitHub pages serves as the frontend where the user can enter a datetime to show the weather in The Netherlands. 
+GitHub pages (now using React) serves as the frontend where the user can enter a datetime to show the weather in The Netherlands. 
 
 Render is used to host and deploy the FastAPI backend which fetches the data.
 
